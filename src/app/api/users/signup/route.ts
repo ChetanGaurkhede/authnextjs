@@ -1,5 +1,4 @@
 import { connect } from "@/dbConfig/dbConfig";
-import mongoose from "mongoose";
 import User from "@/model/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs"; //using for increaption of password
@@ -11,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     const reqBody = await request.json();
 
-    const { username, email, Password } = reqBody;
+    const { username, email, password } = reqBody;
     console.log(reqBody);
 
     const user = await User.findOne({ email });
@@ -27,38 +26,34 @@ export async function POST(request: NextRequest) {
 
     const salt = await bcrypt.genSaltSync(10);
 
-    const hashedPassword = await bcrypt.hash(Password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // adding new user to db
     const newUser = new User({
-      username,
+      username: username,
       email,
-      Password: hashedPassword,
+      password: hashedPassword,
     });
 
-    const savedUser = newUser.save();
+    const savedUser = await newUser.save();
     console.log(savedUser);
 
-
-    savedUser.then(() => {
-      console.log("new user added: ", newUser);
-    })
-    .catch((error: any) => {
-      console.log({ error: error.message });
-    });
+    // savedUser.then(() => {
+    //   console.log("new user added: ", newUser);
+    // })
+    // .catch((error: any) => {
+    //   console.log({ error: error.message });
+    // });
 
     // mailer
 
-    await sendEmail({email, emailType: "VERIFY", userId: savedUser._id})
+    await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id });
 
     return NextResponse.json({
       message: "User register successfully",
       success: true,
-      savedUser
-    })
-
-
-
+      savedUser,
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
