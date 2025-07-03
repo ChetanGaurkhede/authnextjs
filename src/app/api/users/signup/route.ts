@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // savedUser.then(() => {
     //   console.log("new user added: ", newUser);
-    // })
+    // }) 
     // .catch((error: any) => {
     //   console.log({ error: error.message });
     // });
