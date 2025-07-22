@@ -4,12 +4,13 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { CodeSquare, Eye, EyeOff } from "lucide-react";
 import { set } from "mongoose";
 
-const LoginPage = () => {
+const SignupPage = () => {
   const router = useRouter();
   const [user, setUser] = useState({
+    username: "",
     email: "",
     password: "",
   });
@@ -19,36 +20,32 @@ const LoginPage = () => {
   const [eyeIcon, setEyeIcon] = useState(false);
   const [error, setError] = useState("");
 
-  const logIn = async (e: React.FormEvent) => {
+  const signup = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("start");
 
     setLoading(true);
     try {
-      const res = await axios.post("/api/users/login", user);
-
-      if (res.data.error) {
-        toast.error(res.data.error);
-      }
-
+      const res = await axios.post("api/users/signup", user);
       console.log(res.data);
-      toast.success("Login successful!");
-      setLoading(false);
-      router.push("/profile");
+      router.push("/login");
+      toast.success("Signup successful!");
     } catch (error: any) {
       console.log("❌ error in fetching api", error.response?.data || error);
-      if (error.response?.data?.error) {
-        setError(error.response.data.error);
-        toast.error(error.response.data.error);
-      } else {
-        toast.error("Login failed");
-      }
+      setError(error.response?.data?.error || "Signup failed");
       setLoading(false);
+      if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      }
     }
   };
 
   useEffect(() => {
-    if (user.email.length > 0 && user.password.length > 0) {
+    if (
+      user.email.length > 0 &&
+      user.username.length > 0 &&
+      user.password.length > 0
+    ) {
       setDisabled(true);
     } else {
       setDisabled(false);
@@ -58,13 +55,21 @@ const LoginPage = () => {
   return (
     <div className="bg-gray-700 w-md m-auto mt-5 rounded-xl p-6 text-white">
       <h1 className="text-center text-3xl mb-4">
-        Login{" "}
+        Sign Up{" "}
         {loading && (
           <span className="text-sm ml-2 text-yellow-400">Loading...</span>
         )}
       </h1>
 
-      <form onSubmit={logIn} className="flex flex-col gap-4">
+      <form onSubmit={signup} className="flex flex-col gap-4">
+        <input
+          id="username"
+          type="text"
+          placeholder="Username"
+          value={user.username}
+          onChange={(e) => setUser({ ...user, username: e.target.value })}
+          className="p-3 rounded-xl border border-gray-300 text-black"
+        />
         <input
           id="email"
           type="email"
@@ -92,8 +97,8 @@ const LoginPage = () => {
             {eyeIcon ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
-        {error && <p className="text-red-400 text-sm">{error}</p>}
 
+        {error && <p className="text-red-500 text-sm">{error}</p>}
         <button
           type="submit"
           disabled={!disabled || loading}
@@ -103,17 +108,17 @@ const LoginPage = () => {
               : "cursor-pointer"
           }`}
         >
-          {loading ? "Submitting..." : "Login"}
+          {loading ? "Submitting..." : "Sign Up"}
         </button>
-
         <p>
-          Don't have an account?{" "}
-          <Link href="/signup" className="text-blue-500 underline italic">
-            Sign Up
+          Already have an account?{" "}
+          <Link href="/login" className="text-blue-500 underline italic">
+            Log In
           </Link>
         </p>
       </form>
     </div>
   );
 };
-export default LoginPage;
+
+export default SignupPage;

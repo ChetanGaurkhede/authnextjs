@@ -7,8 +7,8 @@ connect();
 
 export async function POST(request: NextRequest) {
   // Extract data from token
-  const userId = getDataFromToken(request);
-  const user = User.findOne({ _id: userId }).select("-password"); // "-"means not select
+  const userId = await getDataFromToken(request);
+  const user = await User.findOne({ _id: userId }).select("-password"); // "-"means not select
 
   //Check if there is no user
 
